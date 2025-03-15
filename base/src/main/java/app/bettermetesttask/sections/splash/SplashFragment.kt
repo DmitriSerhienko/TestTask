@@ -1,7 +1,5 @@
 package app.bettermetesttask.sections.splash
 
-import android.os.Handler
-import android.os.Looper
 import androidx.fragment.app.Fragment
 import app.bettermetesttask.R
 import app.bettermetesttask.featurecommon.injection.utils.Injectable
@@ -22,8 +20,6 @@ class SplashFragment : Fragment(R.layout.splash_fragment), Injectable {
 
     override fun onResume() {
         super.onResume()
-        Handler(Looper.getMainLooper()).postDelayed({
-            viewModel.handleAppLaunch()
-        }, 2000L)
+        viewModel.handleAppLaunch()
     }
 }

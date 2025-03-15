@@ -13,23 +13,22 @@ class ObserveMoviesUseCase @Inject constructor(
 ) {
 
     suspend operator fun invoke(): Flow<Result<List<Movie>>> {
-        return when (val result = repository.getMovies()) {
-            is Result.Success -> {
-                repository.observeLikedMovieIds()
-                    .map { likedMoviesIds ->
-                        val movies = result.data.map {
-                            if (likedMoviesIds.contains(it.id)) {
-                                it.copy(liked = true)
-                            } else {
-                                it
-                            }
-                        }
-                        Result.Success(movies)
-                    }
+        return repository.getMovies()
+            .let { result ->
+                when (result) {
+                    is Result.Success -> combineMoviesWithLiked(result.data)
+                    is Result.Error -> flowOf(result)
+                }
             }
-            is Result.Error -> {
-                flowOf(result)
+    }
+
+    private fun combineMoviesWithLiked(movies: List<Movie>): Flow<Result<List<Movie>>> {
+        return repository.observeLikedMovieIds()
+            .map { likedMovieIds ->
+                val updatedMovies = movies.map {
+                    it.copy(liked = likedMovieIds.contains(it.id))
+                }
+                Result.Success(updatedMovies)
             }
-        }
     }
 }

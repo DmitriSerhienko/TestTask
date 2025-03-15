@@ -47,10 +47,9 @@ class HomeActivity : AppCompatActivity(R.layout.activity_main), HasAndroidInject
 
     override fun androidInjector(): AndroidInjector<Any> = dispatchingAndroidInjector
 
-    @Suppress("unused")
     private fun colorStatusBar(@IdRes fragmentId: Int) {
         window.statusBarColor = when (fragmentId) {
-            R.id.moviesFragment -> {
+            R.id.moviesFragmentCompose -> {
                 ResourcesCompat.getColor(resources, R.color.white, theme)
             }
             else -> {
@@ -61,6 +60,7 @@ class HomeActivity : AppCompatActivity(R.layout.activity_main), HasAndroidInject
 
     private fun initNavListener(): NavController.OnDestinationChangedListener {
         return NavController.OnDestinationChangedListener { _, destination, _ ->
+            colorStatusBar(destination.id)
 
             //as soon as any fragment except for splash shows up we can safely change window background
             // checking for LayerDrawable to avoid redundant background changes
