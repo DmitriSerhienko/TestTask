@@ -10,5 +10,7 @@
 
     <!-- Movies screens -->
     <string name="movies_title">Hello from movies fragment</string>
+    <string name="try_again">Try again!</string>
+
 
 </resources>

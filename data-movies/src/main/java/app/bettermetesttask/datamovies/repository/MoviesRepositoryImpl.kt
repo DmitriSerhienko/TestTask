@@ -11,17 +11,31 @@ import javax.inject.Inject
 
 class MoviesRepositoryImpl @Inject constructor(
     private val localStore: MoviesLocalStore,
-    private val mapper: MoviesMapper
+    private val mapper: MoviesMapper,
+    private val moviesStore: MoviesRestStore,
 ) : MoviesRepository {
 
-    private val restStore = MoviesRestStore()
-
     override suspend fun getMovies(): Result<List<Movie>> {
-        TODO("Not yet implemented")
-    }
+        val localMovies = localStore.getMovies()
 
-    override suspend fun getMovie(id: Int): Result<Movie> {
-        return Result.of { mapper.mapFromLocal(localStore.getMovie(id)) }
+        if (localMovies.isNotEmpty()) {
+            return Result.Success(mapper.mapListFromLocal(localMovies))
+        }
+
+        return when (val remoteResult = moviesStore.getMovies()) {
+            is Result.Success -> {
+                val remoteMovies = remoteResult.data
+
+                if (remoteMovies.isNotEmpty()) {
+                    localStore.insertMovies(mapper.mapListToLocal(remoteMovies))
+                }
+
+                Result.Success(remoteMovies)
+            }
+            is Result.Error -> {
+                Result.Error(remoteResult.error)
+            }
+        }
     }
 
     override fun observeLikedMovieIds(): Flow<List<Int>> {
